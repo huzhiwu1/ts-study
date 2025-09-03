@@ -96,3 +96,40 @@ export type OptionalKeys<T extends object> = {
 // };
 // // Expect: "opt" | "optUndef"
 // type Keys = OptionalKeys<Props>;
+
+// export type PickByValue<T extends object, ValueType> = Pick<
+//   T,
+//   {
+//     [K in keyof T]-?: { [P in K]: T[P] } extends { [P in K]: ValueType }
+//       ? K
+//       : never;
+//   }[keyof T]
+// >;
+
+// 根据valueType找到属性名，通过pick和属性名选出属性
+export type PickByValue<T extends object, ValueType> = Pick<
+  T,
+  {
+    [K in keyof T]-?: T[K] extends ValueType ? K : never;
+  }[keyof T]
+>;
+// type Props = { req: number; reqUndef: number | undefined; opt?: string };
+// Expect: { req: number }
+// type a = PickByValue<Props, number>;
+// // Expect: { req: number; reqUndef: number | undefined; }
+// type b = PickByValue<Props, number | undefined>;
+
+// type a = number extends number | undefined ? true : false;
+
+export type PickByValueExact<T extends object, ValueType> = Pick<
+  T,
+  {
+    [K in keyof T]: [T[K]] extends [ValueType] ? K : never;
+  }[keyof T]
+>;
+
+type Props = { req: number; reqUndef: number | undefined; opt?: string };
+// Expect: { req: number }
+type a = PickByValueExact<Props, number>;
+// Expect: { reqUndef: number | undefined; }
+type b = PickByValueExact<Props, number | undefined>;
