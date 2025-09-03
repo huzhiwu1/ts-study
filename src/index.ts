@@ -67,16 +67,32 @@ type ReadonlyKeys<T extends object> = {
 export type RequiredKeys<T extends object> = {
   [K in keyof T]-?: {} extends { [P in K]: T[P] } ? never : K;
 }[keyof T];
-type Props = {
-  req: number;
-  reqUndef: number | undefined;
-  opt?: string;
-  optUndef?: number | undefined;
-};
+// type Props = {
+//   req: number;
+//   reqUndef: number | undefined;
+//   opt?: string;
+//   optUndef?: number | undefined;
+// };
 // Expect: "req" | "reqUndef"
-type Keys = RequiredKeys<Props>;
+// type Keys = RequiredKeys<Props>;
 
 // //  false
 // type a = {} extends { name: 1 } ? true : false;
 // // true
 // type b = {} extends { name?: 1 } ? true : false;
+
+export type OptionalKeys<T extends object> = {
+  [K in keyof T]-?: {} extends {
+    [P in K]: T[K];
+  }
+    ? K
+    : never;
+}[keyof T];
+// type Props = {
+//   req: number;
+//   reqUndef: number | undefined;
+//   opt?: string;
+//   optUndef?: number | undefined;
+// };
+// // Expect: "opt" | "optUndef"
+// type Keys = OptionalKeys<Props>;
