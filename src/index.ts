@@ -34,7 +34,7 @@ type MutableKeys<T extends object> = {
     U
   >;
 }[keyof T];
-type Props = { readonly foo: string; bar: number };
+// type Props = { readonly foo: string; bar: number };
 // Expect: "bar"
 
 // type Keys = MutableKeys<Props>;
@@ -50,3 +50,16 @@ type Props = { readonly foo: string; bar: number };
 // type c = a extends b ? "yes" : "no";
 // yes
 // type d = a extends b ? "yes" : "no";
+
+type ReadonlyKeys<T extends object> = {
+  [K in keyof T]: IfEqual<
+    { [P in K]: T[K] },
+    { -readonly [P in K]: T[K] },
+    never,
+    K
+  >;
+}[keyof T];
+// type Props = { readonly foo: string; bar: number };
+
+// // Expect: "foo"
+// type Keys = ReadonlyKeys<Props>;
