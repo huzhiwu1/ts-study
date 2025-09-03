@@ -155,9 +155,182 @@ export type OmitByValue<T, ValueType> = Pick<
   { [Key in keyof T]-?: T[Key] extends ValueType ? never : Key }[keyof T]
 >;
 
-type Props = { req: number; reqUndef: number | undefined; opt?: string };
+// type Props = { req: number; reqUndef: number | undefined; opt?: string };
 
-// Expect: { reqUndef: number | undefined; opt?: string; }
-type a = OmitByValue<Props, number>;
-// Expect: { opt?: string; }
-type b = OmitByValue<Props, number | undefined>;
+// // Expect: { reqUndef: number | undefined; opt?: string; }
+// type a = OmitByValue<Props, number>;
+// // Expect: { opt?: string; }
+// type b = OmitByValue<Props, number | undefined>;
+
+export type Extract<K extends keyof any, U extends keyof any> = K extends U
+  ? K
+  : never;
+export type Intersection<T extends object, U extends object> = Pick<
+  T,
+  Extract<keyof T, keyof U> & Extract<keyof U, keyof T>
+>;
+
+// type Props = { name: string; age: number; visible: boolean };
+// type DefaultProps = { age: number };
+
+// // Expect: { age: number; }
+// type DuplicateProps = Intersection<Props, DefaultProps>;
+export type setDifference<
+  T extends keyof any,
+  U extends keyof any
+> = T extends U ? never : T;
+export type Diff<T extends object, U extends object> = Pick<
+  T,
+  setDifference<keyof T, keyof U>
+>;
+// type Props = { name: string; age: number; visible: boolean };
+// type DefaultProps = { age: number };
+
+// // Expect: { name: string; visible: boolean; }
+// type DiffProps = Diff<Props, DefaultProps>;
+
+export type PromiseType<T extends Promise<any>> = T extends Promise<infer U>
+  ? U
+  : never;
+
+// export type DeepPartial<T extends object> = {
+//   [K in keyof T]+?: T[K] extends object ? DeepPartial<T[K]> : T[K] | undefined;
+// };
+
+type DeepPartial<T> = T extends Function
+  ? T
+  : T extends Array<infer U>
+  ? DeepPartial<U>
+  : T extends object
+  ? {
+      [K in keyof T]?: DeepPartial<T[K]>;
+    }
+  : T;
+// type ob = {
+//   a: {
+//     name: string;
+//   };
+//   age: number;
+// };
+
+// type a = DeepPartial<ob>;
+
+// true
+// type b = [] extends object?true:false
+// true
+// type c = (() => void) extends object?true:false
+// false
+// type d = (()=>void) extends Array<any>?true:false
+
+export type DeepReadonly<T> = T extends Function
+  ? T
+  : T extends ReadonlyArray<infer U>
+  ? ReadonlyArray<DeepReadonly<U>>
+  : T extends object
+  ? {
+      readonly [K in keyof T]: DeepReadonly<T[K]>;
+    }
+  : T;
+
+// type ob = {
+//   a: {
+//     name: string;
+//   };
+//   age: number;
+//   say: () => void;
+//   arr: string[];
+// };
+
+// type a = DeepReadonly<ob>;
+
+export type DeepRequired<T> = T extends Function
+  ? T
+  : T extends Array<infer U>
+  ? Array<DeepRequired<U>>
+  : T extends object
+  ? {
+      [K in keyof T]-?: DeepRequired<T[K]>;
+    }
+  : T;
+
+// Expect: {
+//   first: {
+//     second: {
+//       name: string;
+//     };
+//   };
+// }
+// type NestedProps = {
+//   first?: {
+//     second?: {
+//       name?: string;
+//     };
+//   };
+// };
+// type RequiredNestedProps = DeepRequired<NestedProps>;
+
+export type DeepNonNullable<T> = T extends Function
+  ? T
+  : T extends Array<infer U>
+  ? Array<DeepNonNullable<U>>
+  : T extends object
+  ? {
+      [K in keyof T]-?: DeepNonNullable<T[K]>;
+    }
+  : NonNullable<T>;
+// Expect: {
+//   first: {
+//     second: {
+//       name: string;
+//     };
+//   };
+// }
+// type NestedProps = {
+//   first?: null | {
+//     second?: null | {
+//       name?: string | null | undefined;
+//     };
+//   };
+//   arr: [
+//     {
+//       a?: null | "a";
+//     }
+//   ];
+//   say?: null | (() => void);
+// };
+// type RequiredNestedProps = DeepNonNullable<NestedProps>;
+
+export type ValuesType<
+  T extends Array<any> | ReadonlyArray<any> | ArrayLike<any> | Record<any, any>
+> = T extends Array<any>
+  ? T[number]
+  : T extends ReadonlyArray<any>
+  ? T[number]
+  : T extends ArrayLike<any>
+  ? T[number]
+  : T extends object
+  ? T[keyof T]
+  : never;
+type Props = { name: string; age: number; visible: boolean };
+// Expect: string | number | boolean
+type PropsValues = ValuesType<Props>;
+
+type NumberArray = number[];
+// Expect: number
+type NumberItems = ValuesType<NumberArray>;
+
+type ReadonlySymbolArray = readonly symbol[];
+// Expect: symbol
+type SymbolItems = ValuesType<ReadonlySymbolArray>;
+
+type NumberTuple = [1, 2];
+// Expect: 1 | 2
+type NumberUnion = ValuesType<NumberTuple>;
+
+type ReadonlyNumberTuple = readonly [1, 2];
+// Expect: 1 | 2
+type AnotherNumberUnion = ValuesType<NumberTuple>;
+
+type BinaryArray = Uint8Array;
+// Expect: number
+type BinaryItems = ValuesType<BinaryArray>;
