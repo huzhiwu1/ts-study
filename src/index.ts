@@ -10,6 +10,13 @@ type MixedProps = {
 };
 
 // Expect: "setName | someFn"
-type Keys = FunctionKeys<MixedProps>;
+// type Keys = FunctionKeys<MixedProps>;
 // 可选参数的函数不能 extends Function,因为可选参数的函数比  Function多了个undefined的选项
 // type a = MixedProps["someFn"] extends Function ? true : false;
+
+type NonFunctionKeys<T extends object> = {
+  [U in keyof T]-?: NonUndefined<T[U]> extends Function ? never : U;
+}[keyof T];
+
+// Expect: "name | someKey"
+type Keys = NonFunctionKeys<MixedProps>;
