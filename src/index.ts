@@ -63,3 +63,20 @@ type ReadonlyKeys<T extends object> = {
 
 // // Expect: "foo"
 // type Keys = ReadonlyKeys<Props>;
+
+export type RequiredKeys<T extends object> = {
+  [K in keyof T]-?: {} extends { [P in K]: T[P] } ? never : K;
+}[keyof T];
+type Props = {
+  req: number;
+  reqUndef: number | undefined;
+  opt?: string;
+  optUndef?: number | undefined;
+};
+// Expect: "req" | "reqUndef"
+type Keys = RequiredKeys<Props>;
+
+// //  false
+// type a = {} extends { name: 1 } ? true : false;
+// // true
+// type b = {} extends { name?: 1 } ? true : false;
