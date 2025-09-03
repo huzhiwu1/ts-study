@@ -124,12 +124,40 @@ export type PickByValue<T extends object, ValueType> = Pick<
 export type PickByValueExact<T extends object, ValueType> = Pick<
   T,
   {
-    [K in keyof T]: [T[K]] extends [ValueType] ? K : never;
+    [K in keyof T]: [T[K]] extends [ValueType]
+      ? [ValueType] extends [T[K]]
+        ? K
+        : never
+      : never;
   }[keyof T]
 >;
 
+// type Props = { req: number; reqUndef: number | undefined; opt?: string };
+// // Expect: { req: number }
+// type a = PickByValueExact<Props, number>;
+// // Expect: { reqUndef: number | undefined; }
+// type b = PickByValueExact<Props, number | undefined>;
+
+export type Omit<T extends object, U extends keyof any> = Pick<
+  T,
+  {
+    [K in keyof T]-?: K extends U ? never : K;
+  }[keyof T]
+>;
+
+// type Props = { name: string; age: number; visible: boolean };
+
+// Expect: { name: string; visible: boolean; }
+// type a = Omit<Props, "age">;
+
+export type OmitByValue<T, ValueType> = Pick<
+  T,
+  { [Key in keyof T]-?: T[Key] extends ValueType ? never : Key }[keyof T]
+>;
+
 type Props = { req: number; reqUndef: number | undefined; opt?: string };
-// Expect: { req: number }
-type a = PickByValueExact<Props, number>;
-// Expect: { reqUndef: number | undefined; }
-type b = PickByValueExact<Props, number | undefined>;
+
+// Expect: { reqUndef: number | undefined; opt?: string; }
+type a = OmitByValue<Props, number>;
+// Expect: { opt?: string; }
+type b = OmitByValue<Props, number | undefined>;
